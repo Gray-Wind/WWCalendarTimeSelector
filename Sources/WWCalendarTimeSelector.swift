@@ -1970,11 +1970,28 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
                         isSelectingStartRange = false
                     }
                     else {
-                        let date0 : Date = rangeDate
-                        let date1 : Date = optionCurrentDateRange.start
-                        optionCurrentDateRange.setStartDate(min(date0, date1))
-                        optionCurrentDateRange.setEndDate(max(date0, date1))
-                        shouldResetRange = true
+						var canSelectEndDate = true
+						var comparingDate = optionCurrentDateRange.start
+						while comparingDate.compare(rangeDate) == .orderedAscending {
+							if (delegate?.WWCalendarTimeSelectorShouldSelectDate?(self, date: comparingDate.endOfDay)) ?? true {
+							}
+							else {
+								canSelectEndDate = false
+								break
+							}
+							comparingDate.addTimeInterval(24 * 60 * 60)
+						}
+						if !canSelectEndDate {
+							optionCurrentDateRange.setStartDate(rangeDate)
+							shouldResetRange = false
+						}
+						else {
+							let date0 : Date = rangeDate
+							let date1 : Date = optionCurrentDateRange.start
+							optionCurrentDateRange.setStartDate(min(date0, date1))
+							optionCurrentDateRange.setEndDate(max(date0, date1))
+							shouldResetRange = true
+						}
                     }
                 }
                 updateDate()
