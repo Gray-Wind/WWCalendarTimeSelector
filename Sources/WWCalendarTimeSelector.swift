@@ -672,7 +672,7 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
         return min(viewBoundsHeight, viewBoundsWidth)
     }
     fileprivate var isSelectingStartRange: Bool = false { didSet { rangeStartLabel.textColor = isSelectingStartRange ? optionSelectorPanelFontColorDateHighlight : optionSelectorPanelFontColorDate; rangeEndLabel.textColor = isSelectingStartRange ? optionSelectorPanelFontColorDate : optionSelectorPanelFontColorDateHighlight } }
-    fileprivate var shouldResetRange: Bool = false
+    fileprivate var shouldResetRange: Bool = true
     fileprivate var tintColor : UIColor! = UIColor.brown
     
     /// Only use this method to instantiate the selector. All customization should be done before presenting the selector to the user.
