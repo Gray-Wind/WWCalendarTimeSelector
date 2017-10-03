@@ -1977,8 +1977,10 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
 							canSelectEndDate = canSelectEndDate && self.delegate?.WWCalendarTimeSelectorShouldSelectDate?(self, date: checkDate) ?? true
 						}
 						if (!canSelectEndDate) {
-							optionCurrentDateRange.setStartDate(rangeDate)
-							optionCurrentDateRange.setEndDate(rangeDate)
+							if (!optionStartDateFixed) {
+								optionCurrentDateRange.setStartDate(rangeDate)
+								optionCurrentDateRange.setEndDate(rangeDate)
+							}
 						}
 						else {
 							let date0 : Date = rangeDate
