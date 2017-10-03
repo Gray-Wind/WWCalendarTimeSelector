@@ -672,7 +672,7 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
         return min(viewBoundsHeight, viewBoundsWidth)
     }
     fileprivate var isSelectingStartRange: Bool = false { didSet { rangeStartLabel.textColor = isSelectingStartRange ? optionSelectorPanelFontColorDateHighlight : optionSelectorPanelFontColorDate; rangeEndLabel.textColor = isSelectingStartRange ? optionSelectorPanelFontColorDate : optionSelectorPanelFontColorDateHighlight } }
-    fileprivate var shouldResetRange: Bool = true
+    fileprivate var shouldResetRange: Bool = false
     fileprivate var tintColor : UIColor! = UIColor.brown
     
     /// Only use this method to instantiate the selector. All customization should be done before presenting the selector to the user.
@@ -1970,20 +1970,15 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
                         isSelectingStartRange = false
                     }
                     else {
+						var checkDate : Date = optionCurrentDateRange.start
 						var canSelectEndDate = true
-						var comparingDate = optionCurrentDateRange.start
-						while comparingDate.compare(rangeDate) == .orderedAscending {
-							if (delegate?.WWCalendarTimeSelectorShouldSelectDate?(self, date: comparingDate.endOfDay)) ?? true {
-							}
-							else {
-								canSelectEndDate = false
-								break
-							}
-							comparingDate.addTimeInterval(24 * 60 * 60)
+						while (checkDate.compare(rangeDate) == .orderedAscending) {
+							checkDate = Calendar(identifier: .gregorian).date(byAdding: .day, value: 1, to: checkDate)!
+							canSelectEndDate = canSelectEndDate && self.delegate?.WWCalendarTimeSelectorShouldSelectDate?(self, date: checkDate) ?? true
 						}
-						if !canSelectEndDate {
+						if (!canSelectEndDate) {
 							optionCurrentDateRange.setStartDate(rangeDate)
-							shouldResetRange = false
+							optionCurrentDateRange.setEndDate(rangeDate)
 						}
 						else {
 							let date0 : Date = rangeDate
@@ -2117,6 +2112,7 @@ internal class WWCalendarRow: UIView {
         else if detail.type == .day {
             let dayHeight = ceil(dayFont.lineHeight)
             let y = (boxHeight - dayHeight) / 2
+            let formatter = DateFormatter()
             var days = DateFormatter().veryShortWeekdaySymbols ?? ["S", "M", "T", "W", "T", "F", "S"]
             days.shiftLeft(by: Calendar.current.firstWeekday - 1)
             for (index, element) in days.enumerated() {
@@ -2657,12 +2653,12 @@ internal class WWClock: UIView {
 
 private extension CGFloat {
     var doubleValue:      Double  { return Double(self) }
-    var degreesToRadians: CGFloat { return CGFloat(doubleValue * .pi / 180) }
-    var radiansToDegrees: CGFloat { return CGFloat(doubleValue * 180 / .pi) }
+    var degreesToRadians: CGFloat { return CGFloat(doubleValue * M_PI / 180) }
+    var radiansToDegrees: CGFloat { return CGFloat(doubleValue * 180 / M_PI) }
 }
 
 private extension Int {
     var doubleValue:      Double  { return Double(self) }
-    var degreesToRadians: CGFloat { return CGFloat(doubleValue * .pi / 180) }
-    var radiansToDegrees: CGFloat { return CGFloat(doubleValue * 180 / .pi) }
+    var degreesToRadians: CGFloat { return CGFloat(doubleValue * M_PI / 180) }
+    var radiansToDegrees: CGFloat { return CGFloat(doubleValue * 180 / M_PI) }
 }
