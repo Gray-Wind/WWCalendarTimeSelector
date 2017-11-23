@@ -20,6 +20,7 @@
 		00FBEF831CC8849D0046C872 /* String+Timepiece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FBEF7B1CC8849D0046C872 /* String+Timepiece.swift */; };
 		00FBEF841CC8849D0046C872 /* WWCalendarTimeSelector.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 00FBEF7C1CC8849D0046C872 /* WWCalendarTimeSelector.storyboard */; };
 		00FBEF851CC8849D0046C872 /* WWCalendarTimeSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FBEF7D1CC8849D0046C872 /* WWCalendarTimeSelector.swift */; };
+		C4B933271FC7738900017266 /* Array+Shift.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B933261FC7738900017266 /* Array+Shift.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		00FBEF7B1CC8849D0046C872 /* String+Timepiece.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Timepiece.swift"; sourceTree = "<group>"; };
 		00FBEF7C1CC8849D0046C872 /* WWCalendarTimeSelector.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = WWCalendarTimeSelector.storyboard; sourceTree = "<group>"; };
 		00FBEF7D1CC8849D0046C872 /* WWCalendarTimeSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WWCalendarTimeSelector.swift; sourceTree = "<group>"; };
+		C4B933261FC7738900017266 /* Array+Shift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Shift.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 		00FBEF861CC889740046C872 /* Helper */ = {
 			isa = PBXGroup;
 			children = (
+				C4B933261FC7738900017266 /* Array+Shift.swift */,
 				00FBEF761CC8849D0046C872 /* Duration.swift */,
 				00FBEF771CC8849D0046C872 /* Int+Timepiece.swift */,
 				00FBEF781CC8849D0046C872 /* NSCalendar+Timepiece.swift */,
@@ -182,6 +185,7 @@
 				00FBEF831CC8849D0046C872 /* String+Timepiece.swift in Sources */,
 				00FBEF821CC8849D0046C872 /* NSDateComponents+Timepiece.swift in Sources */,
 				00FBEF7E1CC8849D0046C872 /* Duration.swift in Sources */,
+				C4B933271FC7738900017266 /* Array+Shift.swift in Sources */,
 				00FBEF7F1CC8849D0046C872 /* Int+Timepiece.swift in Sources */,
 				00FBEF811CC8849D0046C872 /* NSDate+Timepiece.swift in Sources */,
 				007161CF1CC87C26002CB119 /* ViewController.swift in Sources */,
