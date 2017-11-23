@@ -2114,7 +2114,6 @@ internal class WWCalendarRow: UIView {
         else if detail.type == .day {
             let dayHeight = ceil(dayFont.lineHeight)
             let y = (boxHeight - dayHeight) / 2
-            let formatter = DateFormatter()
             var days = DateFormatter().veryShortWeekdaySymbols ?? ["S", "M", "T", "W", "T", "F", "S"]
             days.shiftLeft(by: Calendar.current.firstWeekday - 1)
             for (index, element) in days.enumerated() {
