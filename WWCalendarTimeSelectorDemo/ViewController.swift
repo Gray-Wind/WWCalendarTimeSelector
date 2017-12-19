@@ -32,7 +32,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         "Multiple Selection (LinkedBalls)",//12
         "Date + Year + Time (without Top Panel)",//13
         "Date + Year + Time (without Top Container)",//14
-        "Date Range Selection"//15
+        "Date Range Selection",//15
+		"Date Soft Range Selection",//16
     ]
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -105,6 +106,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             selector.optionLayoutHeight = 300
         case 15:
             selector.optionSelectionType = WWCalendarTimeSelectorSelection.range
+		case 16:
+			selector.optionSelectionType = WWCalendarTimeSelectorSelection.range
+			selector.optionRangeSelectionEdgeBehaviour = .softEdge
             
         default:
             break
@@ -147,5 +151,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         multipleDates = dates
     }
+
+	func WWCalendarTimeSelectorShouldSelectDate(_ selector: WWCalendarTimeSelector, date: Date) -> Bool {
+		if date.compare(Date()) == .orderedAscending || date.compare(Date() + 30.day) == .orderedDescending {
+			return false
+		}
+
+		return true
+	}
+
+	func WWCalendarTimeSelectorBookedDates(_ selector: WWCalendarTimeSelector) -> Array<WWCalendarBookingDateRange> {
+		return [WWCalendarBookingDateRange(from: (Date() + 2.day).beginningOfDay, to: (Date() + 4.day).endOfDay),
+				WWCalendarBookingDateRange(from: (Date() + 8.day).beginningOfDay, to: (Date() + 12.day).endOfDay)];
+	}
 }
 
