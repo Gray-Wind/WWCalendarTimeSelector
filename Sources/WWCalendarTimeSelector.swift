@@ -1993,7 +1993,19 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
                 }
                 
             case .range:
-                
+
+				let isDateInBookingRange = { (date: Date) -> Bool in
+					guard let delegate = self.delegate, let bookedDates = delegate.WWCalendarTimeSelectorBookedDates else {
+						return false
+					}
+					for range in bookedDates(self) {
+						if range.dateFrom.compare(date) == .orderedAscending && range.dateTo.compare(date) == .orderedDescending {
+							return true
+						}
+					}
+					return false
+				}
+
                 var rangeDate = date.beginningOfDay
 
                 if optionStartDateFixed && rangeDate.compare(optionCurrentDate) == .orderedAscending {
@@ -2001,25 +2013,42 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
                 }
 
                 if (shouldResetRange || rangeDate.compare(optionCurrentDateRange.start) == .orderedAscending) && !optionStartDateFixed {
-                    optionCurrentDateRange.setStartDate(rangeDate)
-                    optionCurrentDateRange.setEndDate(rangeDate)
-                    isSelectingStartRange = false
-                    shouldResetRange = false
+					if !isDateInBookingRange(rangeDate) || !isDateInBookingRange(rangeDate + 1.day) {
+						optionCurrentDateRange.setStartDate(rangeDate)
+						optionCurrentDateRange.setEndDate(rangeDate)
+						isSelectingStartRange = false
+						shouldResetRange = false
+					}
                 }
                 else {
                     if isSelectingStartRange && !optionStartDateFixed {
-                        optionCurrentDateRange.setStartDate(rangeDate)
-                        isSelectingStartRange = false
+						if !isDateInBookingRange(rangeDate) || !isDateInBookingRange(rangeDate + 1.day) {
+							optionCurrentDateRange.setStartDate(rangeDate)
+							isSelectingStartRange = false
+						}
                     }
                     else {
-						var checkDate : Date = optionCurrentDateRange.start
-						var canSelectEndDate = true
-						while (checkDate.compare(rangeDate) == .orderedAscending) {
-							checkDate = Calendar(identifier: .gregorian).date(byAdding: .day, value: 1, to: checkDate)!
-							canSelectEndDate = canSelectEndDate && self.delegate?.WWCalendarTimeSelectorShouldSelectDate?(self, date: checkDate) ?? true
+						let canSelectEndDate = { (date: Date, fromDate: Date) -> Bool in
+							var canSelectEndDate = true
+							var checkDate = fromDate
+							while (checkDate.compare(date) == .orderedAscending) {
+								checkDate = Calendar(identifier: .gregorian).date(byAdding: .day, value: 1, to: checkDate)!
+								if isDateInBookingRange(checkDate) {
+									if self.optionRangeSelectionEdgeBehaviour == .hardEdge {
+										return false
+									}
+									else {
+										if isDateInBookingRange(checkDate - 1.day) {
+											return false
+										}
+									}
+								}
+								canSelectEndDate = canSelectEndDate && self.delegate?.WWCalendarTimeSelectorShouldSelectDate?(self, date: checkDate) ?? true
+							}
+							return canSelectEndDate
 						}
-						if (!canSelectEndDate) {
-							if (!optionStartDateFixed) {
+						if !canSelectEndDate(rangeDate, optionCurrentDateRange.start) {
+							if !optionStartDateFixed && !isDateInBookingRange(rangeDate) {
 								optionCurrentDateRange.setStartDate(rangeDate)
 								optionCurrentDateRange.setEndDate(rangeDate)
 							}
