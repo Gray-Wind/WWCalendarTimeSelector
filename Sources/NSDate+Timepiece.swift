@@ -180,7 +180,7 @@ extension Date {
     var endOfDay: Date {
         return (beginningOfDay + 1.day).addingTimeInterval(-1)
     }
-    
+
     var beginningOfHour: Date {
         return change(minute: 0, second: 0)
     }
