@@ -128,6 +128,18 @@ import UIKit
     case sixtyMinutes = 60
 }
 
+/// Set `optionRangeSelectionEdgeBehaviour` with one of the following:
+///
+/// `hardEdge`: This is the default. Do not allow select any booked dates.
+///
+/// `softEdge`: Make it able to select first and last date of booked range. Also it affects drawing.
+@objc public enum WWCalendarTimeSelectorRangeSelectionEdgeBehaviour: Int {
+	/// Do not allow select any booked dates
+	case hardEdge
+	/// Make it able to select first and last date of booked range
+	case softEdge
+}
+
 @objc open class WWCalendarTimeSelectorDateRange: NSObject {
     fileprivate(set) open var start: Date = Date().beginningOfDay
     fileprivate(set) open var end: Date = Date().beginningOfDay
@@ -155,6 +167,17 @@ import UIKit
             start = end
         }
     }
+}
+
+@objc public class WWCalendarBookingDateRange: NSObject {
+
+	public let dateFrom: Date
+	public let dateTo: Date
+
+	init(from: Date, to: Date) {
+		dateFrom = from
+		dateTo = to
+	}
 }
 
 /// The delegate of `WWCalendarTimeSelector` can adopt the `WWCalendarTimeSelectorProtocol` optional methods. The following Optional methods are available:
@@ -239,6 +262,13 @@ import UIKit
     ///     - selector: The selector that is checking for selectablity of date.
     ///     - date: The date that user tapped, but have not yet given feedback to determine if should be selected.
     @objc optional func WWCalendarTimeSelectorShouldSelectDate(_ selector: WWCalendarTimeSelector, date: Date) -> Bool
+
+	/// Method if implemented, will be used to determine if a particular date should be selected.
+	///
+	/// - Parameters:
+	///     - selector: The selector that is checking for selectablity of date.
+	///     - date: The date that user tapped, but have not yet given feedback to determine if should be selected.
+	@objc optional func WWCalendarTimeSelectorBookedDates(_ selector: WWCalendarTimeSelector) -> Array<WWCalendarBookingDateRange>
 }
 
 open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITableViewDataSource, WWCalendarRowProtocol, WWClockProtocol {
@@ -361,8 +391,14 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
     ///
     /// `LinkedBalls`: Smaller circular selection, with a bar connecting adjacent dates.
     open var optionMultipleSelectionGrouping: WWCalendarTimeSelectorMultipleSelectionGrouping = .pill
-    
-    
+
+	/// Set `optionRangeSelectionEdgeBehaviour` with one of the following:
+	///
+	/// `hardEdge`: Do not allow select any disabled dates.
+	///
+	/// `softEdge`: Make it able to select first and last date of disabled range.
+	open var optionRangeSelectionEdgeBehaviour: WWCalendarTimeSelectorRangeSelectionEdgeBehaviour = .hardEdge
+
     // Fonts & Colors
     open var optionCalendarFontMonth = UIFont.systemFont(ofSize: 14)
     open var optionCalendarFontDays = UIFont.systemFont(ofSize: 13)
@@ -457,6 +493,9 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
     
     open var optionMainPanelBackgroundColor = UIColor.white
     open var optionBottomPanelBackgroundColor = UIColor.white
+
+	open var optionBookingDateBackgroundColor = UIColor.gray
+	open var optionBookingDateFontColor = UIColor.lightGray
     
     /// Set global tint color.
     open var optionTintColor : UIColor! {
@@ -577,7 +616,7 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
 
     /// If optionsStartDateFixed is true then move only end point of date selection
     open var optionStartDateFixed = false
-    
+
     // All Views
     @IBOutlet fileprivate weak var topContainerView: UIView!
     @IBOutlet fileprivate weak var bottomContainerView: UIView!
@@ -1638,9 +1677,12 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
                 calRow.dateFutureHighlightFontColor = optionCalendarFontColorFutureDatesHighlight
                 calRow.dateFutureHighlightBackgroundColor = optionCalendarBackgroundColorFutureDatesHighlight
                 calRow.dateFutureFlashBackgroundColor = optionCalendarBackgroundColorFutureDatesFlash
+				calRow.rangeSelectionEdgeBehaviour = optionRangeSelectionEdgeBehaviour
                 calRow.flashDuration = selAnimationDuration
                 calRow.multipleSelectionGrouping = optionMultipleSelectionGrouping
                 calRow.multipleSelectionEnabled = optionSelectionType != .single
+				calRow.bookingDateFontColor = optionBookingDateFontColor
+				calRow.bookingDateBackgroundColor = optionBookingDateBackgroundColor
                 cell.contentView.addSubview(calRow)
                 cell.backgroundColor = UIColor.clear
                 cell.contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|[cr]|", options: [], metrics: nil, views: ["cr": calRow]))
@@ -2072,10 +2114,13 @@ internal class WWCalendarRow: UIView {
     internal var dateFutureHighlightFontColor: UIColor!
     internal var dateFutureHighlightBackgroundColor: UIColor!
     internal var dateFutureFlashBackgroundColor: UIColor!
+	internal var rangeSelectionEdgeBehaviour: WWCalendarTimeSelectorRangeSelectionEdgeBehaviour!
     internal var flashDuration: TimeInterval!
     internal var multipleSelectionGrouping: WWCalendarTimeSelectorMultipleSelectionGrouping = .pill
     internal var multipleSelectionEnabled: Bool = false
-    
+	internal var bookingDateBackgroundColor: UIColor!
+	internal var bookingDateFontColor: UIColor!
+
     internal var selectedDates: Set<Date> {
         set {
             originalDates = newValue
