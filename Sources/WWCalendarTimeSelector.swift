@@ -415,7 +415,7 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
     open var optionCalendarFontColorTodayHighlight = UIColor.white
     open var optionCalendarBackgroundColorTodayHighlight = UIColor.brown
     open var optionCalendarBackgroundColorTodayFlash = UIColor.white
-    open var optionCalendarFontColorPastDates = UIColor.darkGray
+    open var optionCalendarFontColorPastDates = UIColor.lightGray
     open var optionCalendarFontColorPastDatesHighlight = UIColor.white
     open var optionCalendarBackgroundColorPastDatesHighlight = UIColor.brown
     open var optionCalendarBackgroundColorPastDatesFlash = UIColor.white
@@ -2170,9 +2170,28 @@ internal class WWCalendarRow: UIView {
             let today = Date().beginningOfDay
             var date = startDate
             var str: NSMutableAttributedString
-            
-            for i in 1...7 {
+
+			let shouldSelectDate = { (date: Date) -> Bool in
+				return self.timeSelectorDelegate?.WWCalendarTimeSelectorShouldSelectDate?(self.delegate as! WWCalendarTimeSelector, date: date) ?? true
+			}
+
+			let isBookingDate = { (date: Date) -> Bool in
+				guard let delegate = self.timeSelectorDelegate, let bookedDates = delegate.WWCalendarTimeSelectorBookedDates else {
+					return false
+				}
+
+				for range in bookedDates(self.delegate as! WWCalendarTimeSelector) {
+					if range.dateFrom.compare(date) == .orderedAscending && range.dateTo.compare(date) == .orderedDescending {
+						return true
+					}
+				}
+
+				return false
+			}
+
+			for i in 1...7 {
                 if date.weekday == i {
+					var isDateBookingDate = false
                     var font = comparisonDates.contains(date) ? dateFutureFontHighlight : dateFutureFont
                     var fontColor = dateFutureFontColor
                     var fontHighlightColor = dateFutureHighlightFontColor
@@ -2189,20 +2208,21 @@ internal class WWCalendarRow: UIView {
                         fontHighlightColor = datePastHighlightFontColor
                         backgroundHighlightColor = datePastHighlightBackgroundColor.cgColor
                     }
-                    else if timeSelectorDelegate?.WWCalendarTimeSelectorShouldSelectDate?(delegate as! WWCalendarTimeSelector, date: date.endOfDay) ?? true {
-                        // Do nothing here, just for reverting condition
-                    }
-                    else {
+                    else if !shouldSelectDate(date) {
                         font = comparisonDates.contains(date) ? datePastFontHighlight : datePastFont
                         fontColor = datePastFontColor
                         fontHighlightColor = datePastHighlightFontColor
                         backgroundHighlightColor = datePastHighlightBackgroundColor.cgColor
                     }
-                    
+					else if isBookingDate(date) {
+						isDateBookingDate = true
+						fontHighlightColor = bookingDateFontColor
+						backgroundHighlightColor = bookingDateBackgroundColor.cgColor
+					}
+
                     let dateHeight = ceil(font!.lineHeight) as CGFloat
-                    let y = (boxHeight - dateHeight) / 2
-                    
-                    if comparisonDates.contains(date) {
+
+                    if comparisonDates.contains(date) || isDateBookingDate {
                         ctx?.setFillColor(backgroundHighlightColor)
                         
                         if multipleSelectionEnabled {
@@ -2224,30 +2244,61 @@ internal class WWCalendarRow: UIView {
                             let maxConnectorSize = min(max(dateMaxHeight, dateMaxWidth) + multipleSelectionBorder, min(boxHeight, boxWidth))
                             let x = CGFloat(i - 1) * boxWidth + (boxWidth - size) / 2
                             let y = (boxHeight - size) / 2
-                            
-                            // connector
+
+							// ball
+							let ballRect = CGRect(x: x, y: y, width: size, height: size)
+							let isBookingEdge = rangeSelectionEdgeBehaviour == .softEdge && isDateBookingDate && (!isBookingDate(date + 1.day) || !isBookingDate(date - 1.day))
+							if (isBookingEdge) {
+								ctx?.setStrokeColor(bookingDateBackgroundColor.cgColor)
+								ctx?.setLineWidth(4)
+								ctx?.strokeEllipse(in: ballRect.insetBy(dx: 2, dy: 2))
+							}
+							else {
+								ctx?.fillEllipse(in: ballRect)
+							}
+
+							let containsDate: (Date) -> Bool = isDateBookingDate ? isBookingDate : comparisonDates.contains
+
+							// connector
                             switch multipleSelectionGrouping {
                             case .simple:
                                 break
                             case .pill:
-                                if comparisonDates.contains(date - 1.day) {
-                                    ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
-                                }
-                                if comparisonDates.contains(date + 1.day) {
-                                    ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
-                                }
+								if containsDate(date - 1.day) {
+									if (isBookingEdge) {
+										let path = UIBezierPath()
+										path.addArc(withCenter: CGPoint(x: x + size / 2 + 1, y: y + size / 2), radius: size / 2, startAngle: .pi / 2, endAngle: -.pi / 2, clockwise: true)
+										path.addLine(to: CGPoint(x: x + size / 2, y: y))
+										path.addLine(to: CGPoint(x: CGFloat(i - 1) * boxWidth, y: y))
+										path.addLine(to: CGPoint(x: CGFloat(i - 1) * boxWidth, y: y + size))
+										path.fill()
+									}
+									else {
+										ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
+									}
+								}
+								if containsDate(date + 1.day) {
+									if (isBookingEdge) {
+										let path = UIBezierPath()
+										path.addArc(withCenter: CGPoint(x: x + size / 2 - 1, y: y + size / 2), radius: size / 2, startAngle: -.pi / 2, endAngle: .pi / 2, clockwise: true)
+										path.addLine(to: CGPoint(x: x + boxWidth, y: y + size))
+										path.addLine(to: CGPoint(x: x + boxWidth, y: y))
+										path.addLine(to: CGPoint(x: x + size / 2, y: y))
+										path.fill()
+									}
+									else {
+										ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
+									}
+								}
                             case .linkedBalls:
-                                if comparisonDates.contains(date - 1.day) {
-                                    ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth, y: (boxHeight - multipleSelectionBar) / 2, width: boxWidth / 2 + 1, height: multipleSelectionBar))
+                                if containsDate(date - 1.day) {
+									ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth, y: (boxHeight - multipleSelectionBar) / 2, width: boxWidth / 2 + 1, height: multipleSelectionBar))
                                 }
-                                if comparisonDates.contains(date + 1.day) {
-                                    ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: (boxHeight - multipleSelectionBar) / 2, width: boxWidth / 2 + 1, height: multipleSelectionBar))
+                                if containsDate(date + 1.day) {
+									ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: (boxHeight - multipleSelectionBar) / 2, width: boxWidth / 2 + 1, height: multipleSelectionBar))
                                 }
                             }
-                            
-                            // ball
-                            ctx?.fillEllipse(in: CGRect(x: x, y: y, width: size, height: size))
-                        }
+						}
                         else {
                             let size = min(boxHeight, boxWidth)
                             let x = CGFloat(i - 1) * boxWidth + (boxWidth - size) / 2
@@ -2260,8 +2311,9 @@ internal class WWCalendarRow: UIView {
                     else {
                         str = NSMutableAttributedString(string: "\(date.day)", attributes: [NSFontAttributeName: font!, NSForegroundColorAttributeName: fontColor!, NSParagraphStyleAttributeName: paragraph])
                     }
-                    
-                    str.draw(in: CGRect(x: CGFloat(i - 1) * boxWidth, y: y, width: boxWidth, height: dateHeight))
+
+					let y = (boxHeight - dateHeight) / 2
+					str.draw(in: CGRect(x: CGFloat(i - 1) * boxWidth, y: y, width: boxWidth, height: dateHeight))
                     date = date + 1.day
                     if date.month != startDate.month {
                         break
