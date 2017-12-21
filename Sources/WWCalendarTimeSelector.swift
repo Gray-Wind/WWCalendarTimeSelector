@@ -2359,8 +2359,9 @@ internal class WWCalendarRow: UIView {
                             let y = (boxHeight - size) / 2
                             ctx?.fillEllipse(in: CGRect(x: x, y: y, width: size, height: size))
                         }
-                        
-                        str = NSMutableAttributedString(string: "\(date.day)", attributes: [NSAttributedStringKey.font: font!, NSAttributedStringKey.foregroundColor: fontHighlightColor!, NSAttributedStringKey.paragraphStyle: paragraph])
+
+						let currentFontColor = isBookingEdge() ? (comparisonDates.contains(date) ? dateFutureHighlightFontColor! : dateFutureFontColor!) : fontHighlightColor!
+						str = NSMutableAttributedString(string: "\(date.day)", attributes: [NSAttributedStringKey.font: font!, NSAttributedStringKey.foregroundColor: currentFontColor, NSAttributedStringKey.paragraphStyle: paragraph])
                     }
                     else {
                         str = NSMutableAttributedString(string: "\(date.day)", attributes: [NSAttributedStringKey.font: font!, NSAttributedStringKey.foregroundColor: fontColor!, NSAttributedStringKey.paragraphStyle: paragraph])
