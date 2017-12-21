@@ -2048,7 +2048,7 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
 							return canSelectEndDate
 						}
 						if !canSelectEndDate(rangeDate, optionCurrentDateRange.start) {
-							if !optionStartDateFixed && !isDateInBookingRange(rangeDate) {
+							if !optionStartDateFixed && (!isDateInBookingRange(rangeDate) || !isDateInBookingRange(rangeDate + 1.day)) {
 								optionCurrentDateRange.setStartDate(rangeDate)
 								optionCurrentDateRange.setEndDate(rangeDate)
 							}
