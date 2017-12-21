@@ -2221,6 +2221,11 @@ internal class WWCalendarRow: UIView {
 			for i in 1...7 {
                 if date.weekday == i {
 					var isDateBookingDate = false
+
+					let isBookingEdge = { () -> Bool in
+						self.rangeSelectionEdgeBehaviour == .softEdge && isDateBookingDate && (!isBookingDate(date + 1.day) || !isBookingDate(date - 1.day))
+					}
+
                     var font = comparisonDates.contains(date) ? dateFutureFontHighlight : dateFutureFont
                     var fontColor = dateFutureFontColor
                     var fontHighlightColor = dateFutureHighlightFontColor
@@ -2246,7 +2251,6 @@ internal class WWCalendarRow: UIView {
 					else if isBookingDate(date) {
 						isDateBookingDate = true
 						fontHighlightColor = bookingDateFontColor
-						backgroundHighlightColor = bookingDateBackgroundColor.cgColor
 					}
 
                     let dateHeight = ceil(font!.lineHeight) as CGFloat
@@ -2274,18 +2278,6 @@ internal class WWCalendarRow: UIView {
                             let x = CGFloat(i - 1) * boxWidth + (boxWidth - size) / 2
                             let y = (boxHeight - size) / 2
 
-							// ball
-							let ballRect = CGRect(x: x, y: y, width: size, height: size)
-							let isBookingEdge = rangeSelectionEdgeBehaviour == .softEdge && isDateBookingDate && (!isBookingDate(date + 1.day) || !isBookingDate(date - 1.day))
-							if (isBookingEdge) {
-								ctx?.setStrokeColor(bookingDateBackgroundColor.cgColor)
-								ctx?.setLineWidth(4)
-								ctx?.strokeEllipse(in: ballRect.insetBy(dx: 2, dy: 2))
-							}
-							else {
-								ctx?.fillEllipse(in: ballRect)
-							}
-
 							let containsDate: (Date) -> Bool = isDateBookingDate ? isBookingDate : comparisonDates.contains
 
 							// connector
@@ -2294,7 +2286,13 @@ internal class WWCalendarRow: UIView {
                                 break
                             case .pill:
 								if containsDate(date - 1.day) {
-									if (isBookingEdge) {
+									if isBookingEdge() {
+										if comparisonDates.contains(date) && comparisonDates.contains(date + 1.day) {
+											ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
+										}
+
+										ctx?.setFillColor(bookingDateBackgroundColor.cgColor)
+
 										let path = UIBezierPath()
 										path.addArc(withCenter: CGPoint(x: x + size / 2 + 1, y: y + size / 2), radius: size / 2, startAngle: .pi / 2, endAngle: -.pi / 2, clockwise: true)
 										path.addLine(to: CGPoint(x: x + size / 2, y: y))
@@ -2303,11 +2301,20 @@ internal class WWCalendarRow: UIView {
 										path.fill()
 									}
 									else {
+										if isDateBookingDate {
+											ctx?.setFillColor(bookingDateBackgroundColor.cgColor)
+										}
 										ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
 									}
 								}
 								if containsDate(date + 1.day) {
-									if (isBookingEdge) {
+									if isBookingEdge() {
+										if comparisonDates.contains(date) {
+											ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
+										}
+
+										ctx?.setFillColor(bookingDateBackgroundColor.cgColor)
+
 										let path = UIBezierPath()
 										path.addArc(withCenter: CGPoint(x: x + size / 2 - 1, y: y + size / 2), radius: size / 2, startAngle: -.pi / 2, endAngle: .pi / 2, clockwise: true)
 										path.addLine(to: CGPoint(x: x + boxWidth, y: y + size))
@@ -2316,6 +2323,9 @@ internal class WWCalendarRow: UIView {
 										path.fill()
 									}
 									else {
+										if isDateBookingDate {
+											ctx?.setFillColor(bookingDateBackgroundColor.cgColor)
+										}
 										ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: y, width: boxWidth / 2 + 1, height: maxConnectorSize))
 									}
 								}
@@ -2327,6 +2337,21 @@ internal class WWCalendarRow: UIView {
 									ctx?.fill(CGRect(x: CGFloat(i - 1) * boxWidth + boxWidth / 2, y: (boxHeight - multipleSelectionBar) / 2, width: boxWidth / 2 + 1, height: multipleSelectionBar))
                                 }
                             }
+
+							// ball
+							let ballRect = CGRect(x: x, y: y, width: size, height: size)
+							if isBookingEdge() {
+								ctx?.setStrokeColor(bookingDateBackgroundColor.cgColor)
+								ctx?.setLineWidth(4)
+								ctx?.strokeEllipse(in: ballRect.insetBy(dx: 2, dy: 2))
+								if comparisonDates.contains(date) {
+									ctx?.setFillColor(backgroundHighlightColor)
+									ctx?.fillEllipse(in: ballRect.insetBy(dx: 3, dy: 3))
+								}
+							}
+							else {
+								ctx?.fillEllipse(in: ballRect)
+							}
 						}
                         else {
                             let size = min(boxHeight, boxWidth)
