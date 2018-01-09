@@ -8,7 +8,8 @@
 
 import UIKit
 
-@objc public final class WWCalendarTimeSelectorStyle: NSObject {
+@objcMembers
+public final class WWCalendarTimeSelectorStyle: NSObject {
     fileprivate(set) public var showDateMonth: Bool = true
     fileprivate(set) public var showMonth: Bool = false
     fileprivate(set) public var showYear: Bool = true
@@ -140,7 +141,8 @@ import UIKit
 	case softEdge
 }
 
-@objc open class WWCalendarTimeSelectorDateRange: NSObject {
+@objcMembers
+open class WWCalendarTimeSelectorDateRange: NSObject {
     fileprivate(set) open var start: Date = Date().beginningOfDay
     fileprivate(set) open var end: Date = Date().beginningOfDay
     open var array: [Date] {
@@ -171,10 +173,10 @@ import UIKit
 
 @objc public class WWCalendarBookingDateRange: NSObject {
 
-	public let dateFrom: Date
-	public let dateTo: Date
+	let dateFrom: Date
+	let dateTo: Date
 
-	init(from: Date, to: Date) {
+	@objc public required init(from: Date, to: Date) {
 		dateFrom = from
 		dateTo = to
 	}
@@ -271,6 +273,7 @@ import UIKit
 	@objc optional func WWCalendarTimeSelectorBookedDates(_ selector: WWCalendarTimeSelector) -> Array<WWCalendarBookingDateRange>
 }
 
+@objcMembers
 open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITableViewDataSource, WWCalendarRowProtocol, WWClockProtocol {
     
     /// The delegate of `WWCalendarTimeSelector` can adopt the `WWCalendarTimeSelectorProtocol` optional methods. The following Optional methods are available:
