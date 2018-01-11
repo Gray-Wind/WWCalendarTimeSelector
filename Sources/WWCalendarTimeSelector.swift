@@ -177,7 +177,7 @@ open class WWCalendarTimeSelectorDateRange: NSObject {
 	let dateTo: Date
 
 	@objc public required init(from: Date, to: Date) {
-		dateFrom = from
+		dateFrom = from - 1.day
 		dateTo = to
 	}
 }
