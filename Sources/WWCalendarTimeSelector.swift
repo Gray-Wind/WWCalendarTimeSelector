@@ -2055,6 +2055,9 @@ open class WWCalendarTimeSelector: UIViewController, UITableViewDelegate, UITabl
 								optionCurrentDateRange.setStartDate(rangeDate)
 								optionCurrentDateRange.setEndDate(rangeDate)
 							}
+							else {
+								shouldResetRange = true
+							}
 						}
 						else {
 							let date0 : Date = rangeDate
