@@ -2236,7 +2236,15 @@ internal class WWCalendarRow: UIView {
                     var fontColor = dateFutureFontColor
                     var fontHighlightColor = dateFutureHighlightFontColor
                     var backgroundHighlightColor = dateFutureHighlightBackgroundColor.cgColor
-                    if date == today {
+					if isBookingDate(date) {
+						isDateBookingDate = true
+						fontHighlightColor = bookingDateFontColor
+					} else if !shouldSelectDate(date) {
+						font = comparisonDates.contains(date) ? datePastFontHighlight : datePastFont
+						fontColor = datePastFontColor
+						fontHighlightColor = datePastHighlightFontColor
+						backgroundHighlightColor = datePastHighlightBackgroundColor.cgColor
+					} else if date == today {
                         font = comparisonDates.contains(date) ? dateTodayFontHighlight : dateTodayFont
                         fontColor = dateTodayFontColor
                         fontHighlightColor = dateTodayHighlightFontColor
@@ -2248,16 +2256,6 @@ internal class WWCalendarRow: UIView {
                         fontHighlightColor = datePastHighlightFontColor
                         backgroundHighlightColor = datePastHighlightBackgroundColor.cgColor
                     }
-                    else if !shouldSelectDate(date) {
-                        font = comparisonDates.contains(date) ? datePastFontHighlight : datePastFont
-                        fontColor = datePastFontColor
-                        fontHighlightColor = datePastHighlightFontColor
-                        backgroundHighlightColor = datePastHighlightBackgroundColor.cgColor
-                    }
-					else if isBookingDate(date) {
-						isDateBookingDate = true
-						fontHighlightColor = bookingDateFontColor
-					}
 
                     let dateHeight = ceil(font!.lineHeight) as CGFloat
 
