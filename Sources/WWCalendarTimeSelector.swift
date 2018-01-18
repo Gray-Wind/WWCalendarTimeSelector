@@ -2283,6 +2283,8 @@ internal class WWCalendarRow: UIView {
                             let y = (boxHeight - size) / 2
 
 							let containsDate: (Date) -> Bool = isDateBookingDate ? isBookingDate : comparisonDates.contains
+							let isLeftEdge = isDateBookingDate && (containsDate(date) && !containsDate(date - 1.day))
+							let isRightEdge = isDateBookingDate && (containsDate(date) && !containsDate(date + 1.day))
 
 							// connector
                             switch multipleSelectionGrouping {
@@ -2344,7 +2346,7 @@ internal class WWCalendarRow: UIView {
 
 							// ball
 							let ballRect = CGRect(x: x, y: y, width: size, height: size)
-							if isBookingEdge() {
+							if isBookingEdge() && !(isLeftEdge && !shouldSelectDate(date - 1.day)) && !(isRightEdge && !shouldSelectDate(date + 1.day)) {
 								ctx?.setStrokeColor(bookingDateBackgroundColor.cgColor)
 								ctx?.setLineWidth(4)
 								ctx?.strokeEllipse(in: ballRect.insetBy(dx: 2, dy: 2))
