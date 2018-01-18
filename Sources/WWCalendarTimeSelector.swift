@@ -2211,6 +2211,10 @@ internal class WWCalendarRow: UIView {
 			}
 
 			let isBookingDate = { (date: Date) -> Bool in
+				if !self.multipleSelectionEnabled {
+					return false
+				}
+
 				guard let delegate = self.timeSelectorDelegate, let bookedDates = delegate.WWCalendarTimeSelectorBookedDates else {
 					return false
 				}
